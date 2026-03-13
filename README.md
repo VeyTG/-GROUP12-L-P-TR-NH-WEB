@@ -170,6 +170,239 @@ Logic Error
 
 ---
 
+## 3.4 settings.php
+
+### Bug 6 – Sai cú pháp mảng cấu hình (thiếu dấu phẩy)
+
+Buggy code:
+
+```php
+$config = [
+    'currency' => 'USD'
+    'timezone' => 'Asia/Ho_Chi_Minh',
+    'language' => 'en',
+];
+```
+
+Fix:
+
+```php
+$config = [
+    'currency' => 'USD',
+    'timezone' => 'Asia/Ho_Chi_Minh',
+    'language' => 'en',
+];
+```
+
+Type:
+
+```
+Syntax Error
+```
+
+---
+
+### Bug 7 – Thiếu dấu đóng mảng `]` trước `;`
+
+Buggy code:
+
+```php
+$config = [
+    'currency' => 'USD',
+    'timezone' => 'Asia/Ho_Chi_Minh',
+    'language' => 'en';
+```
+
+Fix:
+
+```php
+$config = [
+    'currency' => 'USD',
+    'timezone' => 'Asia/Ho_Chi_Minh',
+    'language' => 'en',
+];
+```
+
+Type:
+
+```
+Syntax Error
+```
+
+---
+
+### Bug 8 – Tiêu đề trang hiển thị sai
+
+Buggy code:
+
+```php
+<h3>Bookstore settings</h3>
+```
+
+Fix:
+
+```php
+<h3>Store settings</h3>
+```
+
+Type:
+
+```
+Logic Error (UI)
+```
+
+---
+
+## 3.5 reports.php
+
+### Bug 9 – Thiếu dấu `;` sau khi khởi tạo mảng
+
+Buggy code:
+
+```php
+$reportRows = []
+$totalsByCategory = [];
+```
+
+Fix:
+
+```php
+$reportRows = [];
+$totalsByCategory = [];
+```
+
+Type:
+
+```
+Syntax Error
+```
+
+---
+
+### Bug 10 – Gom nhóm theo `name` thay vì `category`
+
+Buggy code:
+
+```php
+foreach ($products as $product) {
+    $category = $product['name'];
+
+    if (!isset($totalsByCategory[$category])) {
+        $totalsByCategory[$category] = 0;
+    }
+
+    $totalsByCategory[$category] += $product['stock'] * $product['price'];
+}
+```
+
+Fix:
+
+```php
+foreach ($products as $product) {
+    $category = $product['category'];
+
+    if (!isset($totalsByCategory[$category])) {
+        $totalsByCategory[$category] = 0;
+    }
+
+    $totalsByCategory[$category] += $product['stock'] * $product['price'];
+}
+```
+
+Type:
+
+```
+Logic Error
+```
+
+---
+
+### Bug 11 – Thiếu dấu ngoặc `)` trong `foreach`
+
+Buggy code:
+
+```php
+foreach ($products as $product {
+    // ...
+}
+```
+
+Fix:
+
+```php
+foreach ($products as $product) {
+    // ...
+}
+```
+
+Type:
+
+```
+Syntax Error
+```
+
+---
+
+## 3.6 orders.php
+
+### Bug 12 – Điều kiện lọc trạng thái đơn hàng sai
+
+Buggy code:
+
+```php
+$pendingOnly = [];
+
+foreach ($orders as $order) {
+    if ($order['status'] === 'completed') {
+        $pendingOnly[] = $order;
+    }
+}
+```
+
+Fix:
+
+```php
+$pendingOnly = [];
+
+foreach ($orders as $order) {
+    if ($order['status'] !== 'completed') {
+        $pendingOnly[] = $order;
+    }
+}
+```
+
+Type:
+
+```
+Logic Error
+```
+
+---
+
+### Bug 13 – Sắp xếp sai thứ tự trong `usort`
+
+Buggy code:
+
+```php
+usort($pendingOnly, function (array $left, array $right): int {
+    return $left['id'] <=> $right['id'];
+});
+```
+
+Fix:
+
+```php
+usort($pendingOnly, function (array $left, array $right): int {
+    return $right['id'] <=> $left['id'];
+});
+```
+
+Type:
+
+```
+Logic Error
+```
+
 # 4. Result
 
 Sau khi sửa các lỗi:
@@ -177,6 +410,9 @@ Sau khi sửa các lỗi:
 - Trang **Dashboard** hiển thị đúng số liệu
 - Trang **Customers** hiển thị danh sách khách hàng hoạt động
 - Trang **Checkout** tính toán tổng tiền chính xác
+- Trang **Settings** hiển thị đúng cấu hình cửa hàng
+- Trang **Reports** thống kê doanh thu theo từng danh mục chính xác
+- Trang **Orders** chỉ hiển thị đơn đang chờ xử lý và sắp xếp đơn mới nhất lên trước
 
 Project chạy ổn định trên server local.
 
