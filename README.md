@@ -1,58 +1,183 @@
-# Buggy PHP Lab
+# Campus Bookstore Lab – Bug Fix Report
 
-Project PHP mini cho sinh viên thực hành tìm lỗi và sửa lỗi.
+## 1. Introduction
 
-## Mục tiêu bài tập
+Campus Bookstore là một mini project PHP mô phỏng trang quản trị nhà sách trong trường học.
 
-Sinh viên cần:
+Mục tiêu của bài lab:
 
-1. Chạy được project trong môi trường local.
-2. Tìm tối thiểu 8 lỗi trong source code.
-3. Phân loại mỗi lỗi vào 1 trong 2 nhóm:
-   - `syntax`
-   - `logic`
-4. Sửa tất cả lỗi để các trang hoạt động đúng.
+- Chạy project trong môi trường local
+- Tìm lỗi trong source code
+- Phân loại lỗi thành **syntax errors** và **logic errors**
+- Sửa lỗi để các trang hoạt động đúng
 
-## Cách chạy
+Thành viên
+- 23521840 Vũ Thị Tường Vy
+- 22520298 Lê Nguyễn Thùy Dương
 
-Yêu cầu:
+---
 
-- PHP 8.1 trở lên
+## 2. Files Checked
 
-Chạy built-in server:
+Trong báo cáo này đã kiểm tra và sửa lỗi ở các file:
 
-```bash
-php -S localhost:8000
+```
+pages/checkout.php
+pages/customers.php
+pages/dashboard.php
 ```
 
-Mở trình duyệt:
+---
 
-```text
-http://localhost:8000
+# 3. Bugs Found and Fixed
+
+## 3.1 checkout.php
+
+### Bug 1 – Discount calculation incorrect
+
+Buggy code:
+
+```php
+$discountValue = $subtotal * $discountPercent;
 ```
 
-## Các trang cần kiểm tra
+Problem:
 
-- `/` hoặc `/?page=dashboard`
-- `/?page=orders`
-- `/?page=checkout`
-- `/?page=customers`
-- `/?page=reports`
-- `/?page=settings`
+Discount 10% nhưng code nhân trực tiếp với 10.
 
-## Gợi ý
+Example:
 
-- Có cả lỗi khiến trang bị `parse error`.
-- Có lỗi không làm crash trang, nhưng trả ra kết quả sai.
-- Không cần database, dữ liệu mẫu nằm trong thư mục `data/`.
-- Nên dùng `php -l <file>` để kiểm tra syntax từng file.
+```
+subtotal = 100
+discount = 100 * 10 = 1000
+```
 
-## Kết quả mong đợi
+Fix:
 
-Sau khi sửa xong:
+```php
+$discountValue = $subtotal * ($discountPercent / 100);
+```
 
-- Tất cả route đều mở được.
-- Số liệu trên dashboard hợp lý.
-- Danh sách đơn hàng hiển thị đúng.
-- Tính toán checkout đúng logic.
-- Báo cáo và cài đặt không còn lỗi syntax.
+Type:
+
+```
+Logic Error
+```
+
+---
+
+### Bug 2 – VAT calculation incorrect
+
+Buggy code:
+
+```php
+$vat = $subtotal * 0.1;
+```
+
+VAT phải tính sau khi trừ discount.
+
+Fix:
+
+```php
+$vat = ($subtotal - $discountValue) * 0.1;
+```
+
+Type:
+
+```
+Logic Error
+```
+
+---
+
+## 3.2 customers.php
+
+### Bug 3 – Missing semicolon
+
+Buggy code:
+
+```php
+$activeCustomers = []
+```
+
+PHP yêu cầu dấu `;` kết thúc câu lệnh.
+
+Fix:
+
+```php
+$activeCustomers = [];
+```
+
+Type:
+
+```
+Syntax Error
+```
+
+---
+
+## 3.3 dashboard.php
+
+### Bug 4 – Revenue calculation incorrect
+
+Buggy code:
+
+```php
+$totalRevenue += $item['qty'];
+```
+
+Revenue phải được tính bằng:
+
+```
+price × quantity
+```
+
+Fix:
+
+```php
+$totalRevenue += $products[$item['sku']]['price'] * $item['qty'];
+```
+
+Type:
+
+```
+Logic Error
+```
+
+---
+
+### Bug 5 – Low stock condition incorrect
+
+Buggy code:
+
+```php
+if ($product['stock'] > 5)
+```
+
+Điều kiện này hiển thị sản phẩm còn nhiều hàng thay vì sắp hết.
+
+Fix:
+
+```php
+if ($product['stock'] <= 5)
+```
+
+Type:
+
+```
+Logic Error
+```
+
+---
+
+# 4. Result
+
+Sau khi sửa các lỗi:
+
+- Trang **Dashboard** hiển thị đúng số liệu
+- Trang **Customers** hiển thị danh sách khách hàng hoạt động
+- Trang **Checkout** tính toán tổng tiền chính xác
+
+Project chạy ổn định trên server local.
+
+---
